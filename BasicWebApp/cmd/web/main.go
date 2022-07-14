@@ -8,6 +8,8 @@ import (
 	"udemygo/basicwebapp/pkg/render"
 )
 
+const portNumber = ":8080"
+
 func main() {
 
 	var app config.AppConfig
@@ -23,8 +25,17 @@ func main() {
 	//give access to app config from the render package
 	render.NewTemplates(&app)
 
-	http.HandleFunc("/", handlers.Repo.Home)
-	http.HandleFunc("/about", handlers.Repo.About)
+	//	http.HandleFunc("/", handlers.Repo.Home)
+	//	http.HandleFunc("/about", handlers.Repo.About)
 
-	_ = http.ListenAndServe("127.0.0.1:8080", nil)
+	//	_ = http.ListenAndServe("127.0.0.1:8080", nil)
+
+	srv := &http.Server{
+		Addr:    portNumber,
+		Handler: routes(&app),
+	}
+
+	err = srv.ListenAndServe()
+	log.Fatal(err)
+
 }
