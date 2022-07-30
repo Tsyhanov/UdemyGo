@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -16,10 +17,12 @@ const portNumber = ":8080"
 var app config.AppConfig
 var session *scs.SessionManager
 
+// main is the main function
 func main() {
-
+	// change this to true when in production
 	app.InProduction = false
 
+	// set up the session
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
 	session.Cookie.Persist = true
@@ -32,17 +35,16 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot create template cache")
 	}
+
 	app.TemplateCache = tc
 	app.UseCache = false
+
 	repo := handlers.NewRepo(&app)
 	handlers.NewHandlers(repo)
-	//give access to app config from the render package
+
 	render.NewTemplates(&app)
 
-	//	http.HandleFunc("/", handlers.Repo.Home)
-	//	http.HandleFunc("/about", handlers.Repo.About)
-
-	//	_ = http.ListenAndServe("127.0.0.1:8080", nil)
+	fmt.Println(fmt.Sprintf("Staring application on port %s", portNumber))
 
 	srv := &http.Server{
 		Addr:    portNumber,
@@ -50,6 +52,7 @@ func main() {
 	}
 
 	err = srv.ListenAndServe()
-	log.Fatal(err)
-
+	if err != nil {
+		log.Fatal(err)
+	}
 }
