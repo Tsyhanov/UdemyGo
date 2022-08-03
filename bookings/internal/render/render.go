@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"udemygo/bookings/pkg/config"
-	"udemygo/bookings/pkg/models"
+	"udemygo/bookings/internal/config"
+	"udemygo/bookings/internal/models"
 
 	"github.com/justinas/nosurf"
 )

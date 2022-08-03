@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"udemygo/bookings/pkg/config"
-	"udemygo/bookings/pkg/handlers"
-	"udemygo/bookings/pkg/render"
+	"udemygo/bookings/internal/config"
+	"udemygo/bookings/internal/handlers"
+	"udemygo/bookings/internal/render"
 
 	"github.com/alexedwards/scs/v2"
 )

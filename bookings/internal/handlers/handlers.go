@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"udemygo/bookings/pkg/config"
-	"udemygo/bookings/pkg/models"
-	"udemygo/bookings/pkg/render"
+	"udemygo/bookings/internal/config"
+	"udemygo/bookings/internal/models"
+	"udemygo/bookings/internal/render"
 )
 
 // Repo the repository used by the handlers
