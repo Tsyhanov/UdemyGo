@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 	"udemygo/bookings/internal/config"
 	"udemygo/bookings/internal/handlers"
+	"udemygo/bookings/internal/models"
 	"udemygo/bookings/internal/render"
 
 	"github.com/alexedwards/scs/v2"
@@ -19,6 +21,9 @@ var session *scs.SessionManager
 
 // main is the main function
 func main() {
+	//store
+	gob.Register(models.Reservation{})
+
 	// change this to true when in production
 	app.InProduction = false
 
