@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 	"udemygo/bookings/internal/config"
+	"udemygo/bookings/internal/driver"
 	"udemygo/bookings/internal/handlers"
 	"udemygo/bookings/internal/helpers"
 	"udemygo/bookings/internal/models"
@@ -26,10 +27,11 @@ var errorLog *log.Logger
 // main is the main function
 func main() {
 
-	err := run()
+	db, err := run()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.SQL.Close()
 
 	fmt.Println(fmt.Printf("Staring application on port %s", portNumber))
 
@@ -44,9 +46,12 @@ func main() {
 	}
 }
 
-func run() error {
+func run() (*driver.DB, error) {
 	//store
 	gob.Register(models.Reservation{})
+	gob.Register(models.User{})
+	gob.Register(models.Room{})
+	gob.Register(models.Restriction{})
 
 	// change this to true when in production
 	app.InProduction = false
@@ -65,19 +70,28 @@ func run() error {
 
 	app.Session = session
 
+	//connect to db
+	log.Println("connecting to db ...")
+	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=bookings user=postgres password=postgres")
+	if err != nil {
+		log.Fatal("can not connect to db! Dying...")
+	}
+
+	log.Println("Connected to database!")
+
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
 		log.Fatal("cannot create template cache")
-		return err
+		return nil, err
 	}
 
 	app.TemplateCache = tc
 	app.UseCache = false
 
-	repo := handlers.NewRepo(&app)
+	repo := handlers.NewRepo(&app, db)
 	handlers.NewHandlers(repo)
-	render.NewTemplates(&app)
+	render.NewRenderer(&app)
 	helpers.NewHelpers(&app)
 
-	return nil
+	return db, nil
 }
