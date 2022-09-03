@@ -361,8 +361,13 @@ func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
 	//grab form data from r
 	form := forms.New(r.PostForm)
 	form.Required("email", "password")
+	form.IsEmail("email")
 	if !form.Valid() {
 		///TODO - back user to page
+		render.Template(w, r, "login.page.tmpl", &models.TemplateData{
+			Form: form,
+		})
+		return
 	}
 
 	id, _, err := m.DB.Authenticate(email, password)
@@ -375,4 +380,18 @@ func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
 	m.App.Session.Put(r.Context(), "user_id", id)
 	m.App.Session.Put(r.Context(), "flash", "Logged in successfully")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+//Logout
+func (m *Repository) Logout(w http.ResponseWriter, r *http.Request) {
+	//just to destroy the session
+	_ = m.App.Session.Destroy(r.Context())
+	_ = m.App.Session.RenewToken(r.Context())
+
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+}
+
+//AdminDashboard
+func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{})
 }
