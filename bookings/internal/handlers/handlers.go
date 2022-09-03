@@ -337,3 +337,42 @@ func (m *Repository) BookRoom(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/make-reservation", http.StatusSeeOther)
 
 }
+
+//ShowLogin Show Login page
+func (m *Repository) ShowLogin(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "login.page.tmpl", &models.TemplateData{
+		Form: forms.New(nil),
+	})
+}
+
+//PostShowLogin Post login page
+func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
+	//always do renew
+	_ = m.App.Session.RenewToken(r.Context())
+
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
+
+	email := r.Form.Get("email")
+	password := r.Form.Get("password")
+
+	//grab form data from r
+	form := forms.New(r.PostForm)
+	form.Required("email", "password")
+	if !form.Valid() {
+		///TODO - back user to page
+	}
+
+	id, _, err := m.DB.Authenticate(email, password)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Invalid login credentials")
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+		return
+	}
+
+	m.App.Session.Put(r.Context(), "user_id", id)
+	m.App.Session.Put(r.Context(), "flash", "Logged in successfully")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
