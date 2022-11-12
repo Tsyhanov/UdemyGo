@@ -1,13 +1,20 @@
 package main
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+var key = []byte("my_secret_string")
+var db = map[string][]byte{} //to store email and pass
 
 func main() {
 	http.HandleFunc("/", index)
@@ -54,8 +61,6 @@ func index(w http.ResponseWriter, r *http.Request) {
 	</html>
 	`, errMsg)
 }
-
-var db = map[string][]byte{} //to store email and pass
 
 func register(w http.ResponseWriter, r *http.Request) {
 
@@ -130,4 +135,40 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	errorMsg := url.QueryEscape("You logged in " + e)
 	http.Redirect(w, r, "/?errormsg="+errorMsg, http.StatusSeeOther)
+}
+
+func createToken(sid string) string {
+	mac := hmac.New(sha256.New, key)
+	mac.Write([]byte(sid))
+	//signature
+	//must be in printable format (hex or base64)
+	//hex
+	//signedMac := fmt.Sprintf("%x", mac.Sum(nil))
+	//base64
+	signedMac := base64.StdEncoding.EncodeToString(mac.Sum(nil))
+
+	return signedMac + "|" + sid
+}
+
+//take signed string and get session id from there
+func parseToken(ss string) (string, error) {
+	xs := strings.SplitN(ss, "|", 2)
+	if len(xs) != 2 {
+		return "", fmt.Errorf("wrong number in string parse token")
+	}
+	b64 := xs[0]
+	xb, err := base64.StdEncoding.DecodeString(b64)
+	if err != nil {
+		return "", fmt.Errorf("could not parse token and decode string %w", err)
+	}
+
+	mac := hmac.New(sha256.New, key)
+	mac.Write([]byte(xs[1]))
+
+	ok := hmac.Equal(xb, mac.Sum(nil))
+	if !ok {
+		return "", fmt.Errorf("not equal signed sid and session id")
+	}
+
+	return xs[1], nil
 }
