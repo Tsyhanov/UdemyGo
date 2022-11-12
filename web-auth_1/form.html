@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    <center> <h1> Login Form </h1> </center>   
+    <center> <h1> Register Form </h1> </center>  
     <form action="/register" method="POST">  
         <div class="container">   
             <label>Email : </label>   
@@ -15,7 +15,17 @@
             <label>Password : </label>   
             <input type="password" placeholder="Enter Password" name="password" required>  
             <button type="submit">Login</button>   
+			<center> <h3> %s </h3> </center>  
         </div>   
-    </form>     
+    </form> 
+    <h1>LOG IN</h1>
+    <form action="/login" method="POST">
+        <div class="container">   
+            <label>Email : </label>   
+            <input type="email" placeholder="Enter Email" name="email" required>  
+            <label>Password : </label>   
+            <input type="password" placeholder="Enter Password" name="password" required>  
+            <button type="submit">Login</button>   
+    </form>>    
 </body>
 </html>
